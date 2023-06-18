@@ -1,0 +1,135 @@
+{
+  "project_info": {
+    "project_number": "196596745803",
+    "firebase_url": "https://notification-46e62.firebaseio.com",
+    "project_id": "notification-46e62",
+    "storage_bucket": "notification-46e62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:196596745803:android:159f4f41aa2735fe95afce",
+        "android_client_info": {
+          "package_name": "com.example.flutter_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJYrU1sI_1VQ9QlJSEhFMUhGJKTic7EPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "196596745803-d7lpbq5iid77firb6q3vji8r4n482q1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:196596745803:android:00afe61a144ebb34",
+        "android_client_info": {
+          "package_name": "com.modulesupn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "196596745803-tju79ct9epaetbtln494e1lk0dqqmhfh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.modulesupn",
+            "certificate_hash": "f3640fab68337d1da3febfd1b2edf86be93f041c"
+          }
+        },
+        {
+          "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJYrU1sI_1VQ9QlJSEhFMUhGJKTic7EPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "196596745803-d7lpbq5iid77firb6q3vji8r4n482q1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:196596745803:android:07da9bdc332de1dd95afce",
+        "android_client_info": {
+          "package_name": "com.nutramerican.sockets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "196596745803-pokfd5s1r9suebra378df1aq3b7e1rli.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nutramerican.sockets",
+            "certificate_hash": "ee2011dbb85ed7f6408f0645bcaf948dba4dc684"
+          }
+        },
+        {
+          "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJYrU1sI_1VQ9QlJSEhFMUhGJKTic7EPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "196596745803-qtl4jilqepjuvbdvhpj612lo9ua3su8l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "196596745803-d7lpbq5iid77firb6q3vji8r4n482q1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
