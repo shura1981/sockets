@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>196596745803-hat73cbn67oqnjefv6gpqtb1re4obc9t.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.196596745803-hat73cbn67oqnjefv6gpqtb1re4obc9t</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>196596745803-chf8rqthfgeja0vhk4fk1h44dqce9n99.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBg5VCVSNVqKAc4qld3RcSFGUzGxMIByBg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>196596745803</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.nutramerican.sockets</string>
+	<key>PROJECT_ID</key>
+	<string>notification-46e62</string>
+	<key>STORAGE_BUCKET</key>
+	<string>notification-46e62.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:196596745803:ios:c55c5c4642ba93a395afce</string>
+	<key>DATABASE_URL</key>
+	<string>https://notification-46e62.firebaseio.com</string>
+</dict>
+</plist>
