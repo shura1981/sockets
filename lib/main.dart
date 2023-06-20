@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:socket_io_client/socket_io_client.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:sockets/utils.dart';
 import 'pages/pages.dart';
 import 'services/push_notifications_service.dart';
 
@@ -21,10 +25,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
-
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -36,7 +39,6 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
 
       navigatorKey.currentState!.pushNamed('/home', arguments: message);
-
     });
 
     super.initState();
@@ -45,37 +47,36 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // TRY THIS: Try running your application with "flutter run". You'll see
-          // the application has a blue toolbar. Then, without quitting the app,
-          // try changing the seedColor in the colorScheme below to Colors.green
-          // and then invoke "hot reload" (save your changes or press the "hot
-          // reload" button in a Flutter-supported IDE, or press "r" if you used
-          // the command line to start the app).
-          //
-          // Notice that the counter didn't reset back to zero; the application
-          // state is not lost during the reload. To reset the state, use hot
-          // restart instead.
-          //
-          // This works for code too, not just values: Most code changes can be
-          // tested with just a hot reload.
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (_) => const MyHomePage(title: 'Flutter Demo Home Page'),
-          '/home': (_) => const HomeScreen(),
-          '/details': (_) => const DetailsScreen(),
-        },
-        navigatorKey: navigatorKey,
-        scaffoldMessengerKey: scaffoldMessengerKey,
-        
-        );
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a blue toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        '/home': (_) => const HomeScreen(),
+        '/details': (_) => const DetailsScreen(),
+      },
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: scaffoldMessengerKey,
+    );
   }
 }
 
@@ -102,16 +103,19 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Message> messages = [];
   TextEditingController textEditingController = TextEditingController();
   IO.Socket? socket;
+  int index = 0;
+  String message = '';
+
   void reciveMessage(data) {
     print(data);
     if (data == null) return;
     setState(() {
-      messages.add(Message(data: data['data'], id: data['id']));
+      messages.add(Message(body: data['body'], id: data['from']));
     });
   }
 
   void sendMessage(String value) {
-    Message message = Message(data: value, id: "from me");
+    Message message = Message(body: value, id: "from me");
     setState(() {
       messages.add(message);
     });
@@ -122,8 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     // IO.Socket socket = IO.io('http://192.168.80.16:3000');
-    // const url = 'http://192.168.80.16:3000';
-    const url = 'https://socket.elitenutritiongroup.com';
+    const url = 'http://192.168.80.16:3000';
+    // const url = 'https://socket.elitenutritiongroup.com';
     socket = IO.io(
         url,
         OptionBuilder()
@@ -167,53 +171,85 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-        appBar: AppBar(
-          // TRY THIS: Try changing the color here to a specific color (to
-          // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-          // change color while the other colors stay the same.
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: ListView(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //
-            // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-            // action in the IDE, or press "p" in the console), to see the
-            // wireframe for each widget.
-            children: <Widget>[
-              const Text(
-                'Ingresa el mensaje:',
-              ),
-              TextField(
-                controller: textEditingController,
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (textEditingController.text.isEmpty) return;
-                  sendMessage(textEditingController.text);
-                  textEditingController.clear();
-                },
-                child: const Text('Enviar'),
-              ),
-              const SizedBox(
-                height: 40,
-              ),
-              ...messages.map((e) {
+      appBar: AppBar(
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showSearch(context: context, delegate: SearchQuery())
+                    .then((value) {
+                  print(value);
+                  if (value != null) {
+                    message = value;
+                    index = 1;
+
+                    setState(() {});
+                  }
+                });
+              },
+              icon: const Icon(Icons.search))
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        //      unselectedItemColor: Colors.green,
+        // selectedItemColor: Colors.yellow,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: index,
+        onTap: (int index) => setState(() => this.index = index),
+      ),
+      body: pages(context),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.pushNamed(context, '/home', arguments: '');
+      //   },
+      //   tooltip: 'to Home',
+      //   child: const Icon(Icons.home),
+      // )
+    );
+  }
+
+  Padding chatSocket(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        // Column is also a layout widget. It takes a list of children and
+        // arranges them vertically. By default, it sizes itself to fit its
+        // children horizontally, and tries to be as tall as its parent.
+        //
+        // Column has various properties to control how it sizes itself and
+        // how it positions its children. Here we use mainAxisAlignment to
+        // center the children vertically; the main axis here is the vertical
+        // axis because Columns are vertical (the cross axis would be
+        // horizontal).
+        //
+        // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+        // action in the IDE, or press "p" in the console), to see the
+        // wireframe for each widget.
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final e = messages[index];
                 return e.id == 'from me'
                     ? Align(
                         alignment: Alignment.centerLeft,
@@ -225,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: Colors.deepPurple[100],
                               borderRadius: BorderRadius.circular(10)),
                           child: Text(
-                            e.data,
+                            e.body,
                           ),
                         ),
                       )
@@ -239,29 +275,226 @@ class _MyHomePageState extends State<MyHomePage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           child: Text(
-                            e.data,
+                            e.body,
                           ),
                         ),
                       );
-              })
+              },
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: textEditingController,
+                  decoration: InputDecoration(
+                    hintText: 'Ingresa el mensaje',
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide:
+                          BorderSide(color: Colors.deepPurple, width: 2),
+                    ),
+                    suffixIcon: IconButton(
+                        onPressed: () {
+                          if (textEditingController.text.isEmpty) return;
+                          sendMessage(textEditingController.text);
+                          textEditingController.clear();
+                        },
+                        icon: const Icon(Icons.send)),
+                    // labelText: 'Mensaje',
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/home', arguments: '');
-          },
-          tooltip: 'to Home',
-          child: const Icon(Icons.home),
-        ));
+        ],
+      ),
+    );
+  }
+
+  Widget pages(BuildContext context) {
+    switch (index) {
+      case 0:
+        return chatSocket(context);
+      case 1:
+        return SearchScreen(message: message);
+      case 2:
+        return Container();
+      default:
+        return Container();
+    }
   }
 }
 
 class Message {
-  String data;
+  String body;
   String id;
-  Message({required this.data, required this.id});
+  Message({required this.body, required this.id});
   toJson() {
-    return {'message': data, 'id': id};
+    return {'body': body, 'id': id};
+  }
+}
+
+class SearchScreen extends StatelessWidget {
+  final String message;
+  const SearchScreen({Key? key, required this.message}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(message),
+      ),
+    );
+  }
+}
+
+class SearchQuery extends SearchDelegate<String> {
+  @override
+  String get searchFieldLabel => 'Buscar';
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: const Icon(Icons.clear),
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        Navigator.pop(context, '');
+      },
+      icon: const Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    getSuggestionsByQuery(query);
+
+    if (query.isEmpty) {
+      return const Center(
+        child: Icon(
+          Icons.book,
+          color: Colors.black38,
+          size: 100,
+        ),
+      );
+    }
+
+    return StreamBuilder(
+      builder: (_, AsyncSnapshot<dynamic> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.data == null) {
+          return const Center(
+            child: Text('No hay resultados'),
+          );
+        }
+
+        final list = snapshot.data;
+        return ListView.builder(
+            itemCount: list.length,
+            itemBuilder: (_, index) {
+              if (snapshot.data == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ListTile(
+                onTap: () {
+                  Navigator.pop(context, list[index]['volumeInfo']['title']);
+                },
+                title: Text(list[index]['volumeInfo']['title']),
+                subtitle: Text(list[index]['volumeInfo']['authors'] != null
+                    ? list[index]['volumeInfo']['authors'][0]
+                    : ''),
+              );
+            });
+      },
+      stream: stream,
+    );
+  }
+
+  final StreamController<dynamic> streamController =
+      StreamController<dynamic>.broadcast();
+  Stream<dynamic> get stream => streamController.stream;
+
+  final debouncer =
+      Debouncer<String>(duration: const Duration(milliseconds: 500));
+
+  Future<void> queryStream(value) async {
+    final values = await getMovies(value);
+    if (values != null) {
+      streamController.add(values);
+    } else {
+      streamController.add([]);
+    }
+  }
+
+  void getSuggestionsByQuery(String search) {
+    debouncer.value = '';
+    debouncer.onValue = (value) async {
+      final values = await getMovies(value);
+      if (values.toString().isNotEmpty) {
+        streamController.add(values);
+      } else {
+        streamController.add([]);
+      }
+    };
+
+    final timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+      debouncer.value = search;
+    });
+
+    Future.delayed(const Duration(milliseconds: 301))
+        .then((_) => timer.cancel());
+  }
+}
+
+getMovies(String query) async {
+  final url = 'https://www.googleapis.com/books/v1/volumes?q=$query';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) throw Exception('Error en la petición');
+  final values = json.decode(response.body);
+  return values['items'];
+}
+
+class BouncerScreen extends StatelessWidget {
+  BouncerScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('BouncerScreen'),
+      ),
+      body: const Center(
+        child: Text('BouncerScreen'),
+      ),
+    );
+  }
+
+  Timer? _debouncer;
+  void debounce(
+    VoidCallback callback, {
+    Duration duration = const Duration(milliseconds: 1000),
+  }) {
+    if (_debouncer != null) {
+      _debouncer!.cancel();
+    }
+    _debouncer = Timer(duration, callback);
   }
 }
