@@ -197,8 +197,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        //      unselectedItemColor: Colors.green,
-        // selectedItemColor: Colors.yellow,
+        unselectedItemColor: const Color.fromARGB(255, 77, 77, 77),
+        selectedItemColor: Colors.deepPurple,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
@@ -211,6 +211,14 @@ class _MyHomePageState extends State<MyHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.find_in_page),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notificaions',
           ),
         ],
         currentIndex: index,
@@ -319,7 +327,16 @@ class _MyHomePageState extends State<MyHomePage> {
       case 1:
         return SearchScreen(message: message);
       case 2:
-        return Container();
+        return Center(
+            child: ElevatedButton(
+          onPressed: () => PushNotificationService.mostarNotificacion(),
+          // ignore: prefer_const_constructors
+          child: Text("presiona para activar notificación"),
+        ));
+      case 3:
+        return BouncerScreen();
+      case 4:
+        return NotifcationScreen();
       default:
         return Container();
     }
@@ -352,7 +369,7 @@ class SearchScreen extends StatelessWidget {
 class SearchQuery extends SearchDelegate<String> {
   @override
   String get searchFieldLabel => 'Buscar';
-
+  List<dynamic> lista = [];
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -377,7 +394,19 @@ class SearchQuery extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container();
+    return ListView.builder(
+        itemCount: lista.length,
+        itemBuilder: (_, index) {
+          return ListTile(
+            onTap: () {
+              Navigator.pop(context, lista[index]['volumeInfo']['title']);
+            },
+            title: Text(lista[index]['volumeInfo']['title']),
+            subtitle: Text(lista[index]['volumeInfo']['authors'] != null
+                ? lista[index]['volumeInfo']['authors'][0]
+                : ''),
+          );
+        });
   }
 
   @override
@@ -407,12 +436,10 @@ class SearchQuery extends SearchDelegate<String> {
         }
 
         final list = snapshot.data;
+        lista = list;
         return ListView.builder(
             itemCount: list.length,
             itemBuilder: (_, index) {
-              if (snapshot.data == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
               return ListTile(
                 onTap: () {
                   Navigator.pop(context, list[index]['volumeInfo']['title']);
@@ -465,29 +492,111 @@ class SearchQuery extends SearchDelegate<String> {
 }
 
 getMovies(String query) async {
+  if (query.isEmpty) return null;
   final url = 'https://www.googleapis.com/books/v1/volumes?q=$query';
   final response = await http.get(Uri.parse(url));
   if (response.statusCode != 200) throw Exception('Error en la petición');
   final values = json.decode(response.body);
+
   return values['items'];
 }
 
 class BouncerScreen extends StatelessWidget {
   BouncerScreen({Key? key}) : super(key: key);
 
+  TextEditingController textEditingController = TextEditingController();
+  final ValueNotifier<String> _valueNotfier = ValueNotifier<String>('');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BouncerScreen'),
-      ),
-      body: const Center(
-        child: Text('BouncerScreen'),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: textEditingController,
+              onChanged: (value) {
+                debounce(() {
+                  _valueNotfier.value = value;
+                }, duration: const Duration(milliseconds: 500));
+              },
+              decoration: InputDecoration(
+                hintText: 'Ingresa el mensaje',
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  borderSide: BorderSide(color: Colors.deepPurple, width: 2),
+                ),
+                suffixIcon: ValueListenableBuilder<String>(
+                    builder: (BuildContext context, value, Widget? child) {
+                      return value.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                textEditingController.clear();
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                _valueNotfier.value = "";
+                              },
+                              icon: const Icon(Icons.clear),
+                            )
+                          : const SizedBox();
+                    },
+                    valueListenable: _valueNotfier),
+                // labelText: 'Mensaje',
+              ),
+            ),
+            Expanded(
+                child: ValueListenableBuilder<String>(
+              builder: (BuildContext context, value, Widget? child) {
+                return FutureBuilder(
+                  initialData: null,
+                  future:
+                      getMovies(textEditingController.text) as Future<dynamic>,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    final list = snapshot.data;
+                    if (snapshot.data == null) {
+                      return const Center(
+                        child: Text('No hay resultados'),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return ListView.builder(
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          onTap: () {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            final message = list[index]['volumeInfo']['title'];
+
+                            final route = MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                                settings: RouteSettings(arguments: message));
+                            Navigator.push(context, route);
+                          },
+                          title: Text(list[index]['volumeInfo']['title']),
+                          subtitle: Text(
+                              list[index]['volumeInfo']['authors'] != null
+                                  ? list[index]['volumeInfo']['authors'][0]
+                                  : ''),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+              valueListenable: _valueNotfier,
+            )),
+          ],
+        ),
       ),
     );
   }
 
   Timer? _debouncer;
+
   void debounce(
     VoidCallback callback, {
     Duration duration = const Duration(milliseconds: 1000),
@@ -496,5 +605,66 @@ class BouncerScreen extends StatelessWidget {
       _debouncer!.cancel();
     }
     _debouncer = Timer(duration, callback);
+  }
+}
+
+class NotifcationScreen extends StatelessWidget {
+  NotifcationScreen({Key? key}) : super(key: key);
+  final ValueNotifier<int> _valueNotfier = ValueNotifier(0);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+          child: ValueListenableBuilder<int>(
+            builder: (context, value, child) {
+              return Text('El valor es $value');
+            },
+            valueListenable: _valueNotfier,
+          ),
+        ),
+        floatingActionButton: NotificationListener<CounterNotification>(
+            onNotification: (notification) {
+              _valueNotfier.value = notification.value;
+              return true;
+            },
+            child: CounterButton()));
+  }
+}
+
+class CounterButton extends StatelessWidget {
+  CounterButton({
+    super.key,
+  });
+  final _counter = Counter();
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        final value = _counter.increment();
+        CounterNotification(value).dispatch(context);
+      },
+      child: const Icon(Icons.plus_one),
+    );
+  }
+}
+
+class CounterNotification extends Notification {
+  final int value;
+
+  CounterNotification(this.value);
+}
+
+class Counter {
+  int _value = 0;
+  Counter([this._value = 0]);
+  int increment() {
+    _value++;
+    return _value;
+  }
+
+  get value => _value;
+  int decrement() {
+    _value--;
+    return _value;
   }
 }

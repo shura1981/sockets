@@ -29,5 +29,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+                   <receiver android:exported="true" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+           <intent-filter>
+               <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+           </intent-filter>
+       </receiver>
+       <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+      <!-- A custom Android Notification Channel to deliver FCM notifications on a non-default channel -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
     </application>
 </manifest>
