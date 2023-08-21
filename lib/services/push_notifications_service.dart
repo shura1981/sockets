@@ -53,6 +53,7 @@ class PushNotificationService {
     _messageStream.add(message.notification?.title ?? 'No data');
     if (message.data.containsKey('screen')) {
     String screen = message.data['screen'];
+    print(screen);
     await flutterLocalNotificationsPlugin.show(
         0, 'Notificación', 'Nueva notificación', const NotificationDetails(),
         payload: "/home");
