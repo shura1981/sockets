@@ -22,6 +22,7 @@ class PushNotificationService {
     await Firebase.initializeApp();
     await requestPermission();
   }
+
   static requestPermission() async {
     NotificationSettings settings = await message.requestPermission(
       alert: true,
@@ -35,9 +36,9 @@ class PushNotificationService {
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       token = await message.getToken();
       print(token);
-      FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
-      FirebaseMessaging.onMessage.listen(_onMessageHandler);
-      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenApp);
+      // FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
+      // FirebaseMessaging.onMessage.listen(_onMessageHandler);
+      // FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenApp);
       localNotificaion();
     }
 
@@ -46,59 +47,60 @@ class PushNotificationService {
     });
   }
 
-
-
   static Future _backgroundHandler(RemoteMessage message) async {
     // print(message.data);
     _messageStream.add(message.notification?.title ?? 'No data');
     if (message.data.containsKey('screen')) {
-    String screen = message.data['screen'];
-    print(screen);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'Notificación', 'Nueva notificación', const NotificationDetails(),
-        payload: "/home");
+      String screen = message.data['screen'];
+      print(screen);
+      await flutterLocalNotificationsPlugin.show(
+          0, 'Notificación', 'Nueva notificación', const NotificationDetails(),
+          payload: "/home");
     }
   }
+
   static Future _onMessageHandler(RemoteMessage message) async {
     // print(message.data);
     _messageStream.add(message.notification?.title ?? 'No data');
   }
+
   static Future _onMessageOpenApp(RemoteMessage message) async {
     // print(message.data);
     _messageStream.add(message.notification?.title ?? 'No data');
   }
 
-
 // local notifications
-/// Create a [AndroidNotificationChannel] for heads up notifications
-static late AndroidNotificationChannel channel;
+  /// Create a [AndroidNotificationChannel] for heads up notifications
+  static late AndroidNotificationChannel channel;
   static String? selectedNotificationPayload;
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
   static localNotificaion() async {
+    channel = const AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'high_importance_channel', // id
+      'This channel is used for important notifications', // title
+      importance: Importance.high,
+    );
 
-      channel = const AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'high_importance_channel', // id
-    'This channel is used for important notifications', // title
-    importance: Importance.high,
-  );
+    /// Create an Android Notification Channel.
+    ///
+    /// We use this channel in the `AndroidManifest.xml` file to override the
+    /// default FCM channel to enable heads up notifications.
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
 
- /// Create an Android Notification Channel.
-  ///
-  /// We use this channel in the `AndroidManifest.xml` file to override the
-  /// default FCM channel to enable heads up notifications.
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
-  /// Update the iOS foreground notification presentation options to allow
-  /// heads up notifications.
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    /// Update the iOS foreground notification presentation options to allow
+    /// heads up notifications.
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('star');
@@ -129,6 +131,7 @@ static late AndroidNotificationChannel channel;
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (String? payload) async {
       if (payload != null) {
+        // método 1
         print('notification payload: $payload');
       }
       selectedNotificationPayload = payload;
@@ -137,23 +140,29 @@ static late AndroidNotificationChannel channel;
       );
     }).then((value) => null);
 
-    var notificationAppLaunchDetails =
-        await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-      String? screen = notificationAppLaunchDetails?.payload;
-      if (screen != null) {
-        // Navigator.pushNamed(context, screen);
-        _messageStream.add(
-          screen,
-        );
-      }
-    }
+    // var notificationAppLaunchDetails =
+    //     await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+    // if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+    //   String? screen = notificationAppLaunchDetails?.payload;
+    //   if (screen != null) {
+    //     // Navigator.pushNamed(context, screen);
+    //     // método 2
+    //     _messageStream.add(
+    //       screen,
+    //     );
+    //   }
+    // }
   }
-  static mostarNotificacion() {
+
+  static mostarNotificacion({
+    required String title,
+    required String body,
+    required String payload,
+  }) {
     flutterLocalNotificationsPlugin.show(
         0,
-        'New Post',
-        'How to Show Notification in Flutter',
+        title,
+        body,
         const NotificationDetails(
           android: AndroidNotificationDetails(
             "1",
@@ -163,7 +172,7 @@ static late AndroidNotificationChannel channel;
           ),
           iOS: IOSNotificationDetails(),
         ),
-        payload: 'How to Show Notification in Flutter');
+        payload: payload);
   }
 }
 
